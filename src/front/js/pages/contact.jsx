@@ -7,7 +7,6 @@ import "../../styles/home.css";
 const ContactList = () => {
     const { store, actions } = useContext(Context)
 
-    useEffect(() => { }, [store.listaContactos])
 
     return (
         <>

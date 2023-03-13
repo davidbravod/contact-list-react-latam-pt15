@@ -8,23 +8,52 @@ import "../../styles/home.css";
 const EditContact = (props) => {
     const params = useParams();
     const { store, actions } = useContext(Context);
-    const [fullName, setFullName] = useState(store.listaContactos[params.theindex].full_name);
-    const [email, setEmail] = useState(store.listaContactos[params.theindex].email);
-    const [address, setAddress] = useState(store.listaContactos[params.theindex].address);
-    const [phone, setPhone] = useState(store.listaContactos[params.theindex].phone);
+    const [fullName, setFullName] = useState('');
+    const [email, setEmail] = useState('');
+    const [address, setAddress] = useState('');
+    const [phone, setPhone] = useState('');
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [contacto, setContacto] = useState();
 
-    const handleEditContact = () => {
-        const updatedContact = {
+    useEffect(() => {
+        let funcionCargaContacto = async () => {
+            let { respuestaJson, response } = await actions.useFetch(`/apis/fake/contact/${params.contactID}`)
+            console.log(respuestaJson)
+            setContacto(respuestaJson)
+            setFullName(respuestaJson.full_name)
+            setEmail(respuestaJson.email)
+            setAddress(respuestaJson.address)
+            setPhone(respuestaJson.phone)
+            setIsLoaded(true)
+        }
+        funcionCargaContacto()
+
+    }, [])
+
+    useEffect(() => { }, [contacto])
+
+    const handleSubmit = async () => {
+        const editedContact = {
             full_name: fullName,
-            email: email,
-            address: address,
-            phone: phone
+            email,
+            phone,
+            address,
+            agenda_slug: "davids_agenda_testing",
         };
-        actions.editContact(params.theindex, updatedContact);
+
+        let { respuestaJson, response } = await actions.useFetch(`/apis/fake/contact/${params.contactID}`, editedContact, "PUT");
+        if (!response.ok) {
+            console.log(response);
+            Swal.fire("Error", "There was an error, please carefully review the information and try again", "error");
+            return;
+        }
+
+        setContacto(editedContact)
+
         Swal.fire({
-            position: 'center',
-            icon: 'success',
-            title: 'You have edited the contact',
+            position: "center",
+            icon: "success",
+            title: "You have added a new contact to the list",
             showConfirmButton: true,
         });
     };
@@ -32,7 +61,7 @@ const EditContact = (props) => {
     return (
         <div className="container mt-4 bg-light p-3">
             <div className="d-flex align-items-center">
-                <h1>Edit Contact: {store.listaContactos[params.theindex].full_name}</h1>
+                <h1>Edit Contact: {isLoaded && contacto.full_name}</h1>
                 <Link to="/"><button type="button" className="btn btn-primary m-3">Go Back</button></Link>
             </div>
             <form className="row g-3">
@@ -53,7 +82,8 @@ const EditContact = (props) => {
                     <input type="tel" className="form-control" id="phone" name="phone" placeholder="Enter phone number" value={phone} onChange={(e) => setPhone(e.target.value)} />
                 </div>
                 <div className="col-md-12 d-flex align-items-end justify-content-center">
-                    <button type="button" className="btn btn-primary w-50 mt-4" onClick={handleEditContact}>Edit</button>
+                    <button type="button" className="btn btn-primary w-50 mt-4" onClick={handleSubmit}
+                    >Edit</button>
                 </div>
             </form>
         </div>
