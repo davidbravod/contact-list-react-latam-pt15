@@ -53,7 +53,7 @@ const EditContact = (props) => {
         Swal.fire({
             position: "center",
             icon: "success",
-            title: "You have added a new contact to the list",
+            title: "You have edited the contact",
             showConfirmButton: true,
         });
     };
